@@ -1,128 +1,132 @@
 import './ClueSheet.css';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Josa from 'josa-js';
 import sheetItemData from './item.json'
 import cellIConData from './icon.json'
 
-class Icons {
-  static index = {
-    default: 0,
-    check: 1,
-  }
-
-  static get(index = undefined) {
-    if (index === undefined)
-      return cellIConData;
-    return cellIConData[index];
-  }
-}
-
 function ClueSheet() {
 
-  const number = { min: 2, max: 7, default: 7 };
+  const playerNumber = {
+    default: 7,
+    min: 2,
+    max: 7,
+  };
 
-  function getDefaultNumberOfItems() {
-    let numberOfItemsDefault = 0;
-    Object.keys(sheetItemData).forEach((v) => numberOfItemsDefault += sheetItemData[v].length);
-    return numberOfItemsDefault;
+  const iconDataIndex = {
+    default: 0,
+    checked: 1,
+    x: 2,
+  };
+
+  function setCheckBoxesValueRow(row, value = cellIConData[iconDataIndex.default]) {
+    checkBoxesValues[row].forEach((_, column) => setCheckBoxesValue(row, column, value));
   }
 
-  const numberOfPlayersDefault = number.default;
-  const numberOfItems = getDefaultNumberOfItems();
-  const [numberOfPlayers, setNumberOfPlayers] = useState(numberOfPlayersDefault);
-  const [numberOfCardsPerPlayer, setNumberOfCardsPerPlayer] = useState(Math.floor(numberOfItems /
-  numberOfPlayersDefault));
-  const [columnHeaderClassNames, setColumnHeaderClassNames] = useState(new Array(number.max).fill('head'));
-  const [columnHeaderValues, setColumnHeaderValues] = useState(Array.from({length: number.max}, (_, k) => "P"+(k+1)));
-  const [itemRowHeadersClassNames, setItemRowHeadersClassNames] = useState(new Array(numberOfItems).fill('normal'));
-  const [checkBoxesValues, setCheckBoxesValues] = useState(new Array(numberOfItems).fill(0).map(row => new Array(number.max).fill(Icons.get(Icons.index.default))));
+  function setCheckBoxesValue(row, column, value) {
+    let checkBoxesValuesNew = checkBoxesValues.slice();
+    if (value === cellIConData[iconDataIndex.v])
+      setCheckBoxesValueRow(row, cellIConData[iconDataIndex.x]);
+    checkBoxesValuesNew[row][column] = value;
+    setCheckBoxesValues(checkBoxesValuesNew);
+  }
 
-  function checkRowHeaderClassName(checkBoxes, row) {
-    if (checkBoxes[row].includes(Icons.get(Icons.index.check)))
+  function editColumnHeaderValue(column) {
+    let columnHeaderValuesNew = columnHeaderValues.slice();
+    columnHeaderValuesNew[column] = prompt("새로운 이름을 입력하세요", columnHeaderValues[column]);
+    setColumnHeaderValues(columnHeaderValuesNew);
+  }
+
+  function getNumberOfItems() {
+    const sheetItemDatalengthes = Object.keys(sheetItemData).map((key) => sheetItemData[key].length);
+    return sheetItemDatalengthes.reduce((numberOfItems, length) => numberOfItems + length)
+  }
+
+  function getRowHeaderClassName(row) {
+    if (checkBoxesValues[row].every((v) => v === cellIConData[iconDataIndex.x]))
+      return 'expected'
+    if (checkBoxesValues[row].includes(cellIConData[iconDataIndex.v]))
       return 'checked';
     return 'normal';
   }
 
-  function checkColumnHeaderClassName(checkBoxes, column) {
-    if (checkBoxes.filter((rows) => rows[column] === Icons.get(Icons.index.check)).length >= numberOfCardsPerPlayer)
+  function getColumnHeaderClassName(column) {
+    const checked = checkBoxesValues.filter((rows) => rows[column] === cellIConData[iconDataIndex.v]).length;
+    if (checked >= numberOfCardsPerPlayer)
       return 'checked';
     return 'header';
   }
 
-  function onChangeCell(row, column, value) {
-    let checkBoxesValuesNew = checkBoxesValues.slice();
-    checkBoxesValuesNew[row][column] = value;
-    setCheckBoxesValues(checkBoxesValuesNew);
-    console.log(checkBoxesValuesNew);
+  const numberOfPlayersDefault = playerNumber.default;
+  const numberOfItems = getNumberOfItems();
 
-    let itemRowHeadersClassNamesNew = itemRowHeadersClassNames.slice();
-    itemRowHeadersClassNamesNew[row] = checkRowHeaderClassName(checkBoxesValuesNew, row);
+  const [checkBoxesValues, setCheckBoxesValues] = useState(Array.from({ length: numberOfItems }, () => new Array(playerNumber.max).fill(cellIConData[iconDataIndex.default])));
+  useEffect(() => {
+    const itemRowHeadersClassNamesNew = itemRowHeadersClassNames.map((_, i) => getRowHeaderClassName(i));
     setItemRowHeadersClassNames(itemRowHeadersClassNamesNew);
 
-    let columnHeaderClassNamesNew = columnHeaderClassNames.slice();
-    columnHeaderClassNamesNew[column] = checkColumnHeaderClassName(checkBoxesValuesNew, column);
+    const columnHeaderClassNamesNew = columnHeaderClassNames.map((_, i) => getColumnHeaderClassName(i));
     setColumnHeaderClassNames(columnHeaderClassNamesNew);
-  }
+  }, [checkBoxesValues]);
 
-  function onChangeNumberOfPlayers(numberOfPlayersNew) {
-    let checkBoxesValuesNew = checkBoxesValues.map((v, row) => v.map((icon, column) => {
-      if (column >= numberOfPlayersNew) {
-        const iconNew = Icons.get(Icons.index.default);
-        if (iconNew !== icon)
-          onChangeCell(row, column, iconNew);
-        return iconNew;
+  const [numberOfPlayers, setNumberOfPlayers] = useState(numberOfPlayersDefault);
+  useEffect(() => {
+    const checkBoxesValuesNew = checkBoxesValues.map((v, row) => v.map((value, column) => {
+      if (column >= numberOfPlayers) {
+        const valueNew = cellIConData[iconDataIndex.default];
+        if (valueNew !== value)
+          setCheckBoxesValue(row, column, valueNew);
+        return valueNew;
       }
-      return icon;
+      return value;
     }));
     setCheckBoxesValues(checkBoxesValuesNew);
-    setNumberOfCardsPerPlayer(Math.floor((numberOfItems/numberOfPlayersNew)));
-    setNumberOfPlayers(numberOfPlayersNew);
-  }
+
+    const numberOfCardsPerPlayerNew = Math.floor(numberOfItems / numberOfPlayers);
+    setNumberOfCardsPerPlayer(numberOfCardsPerPlayerNew);
+  }, [numberOfPlayers]);
+
+  const [numberOfCardsPerPlayer, setNumberOfCardsPerPlayer] = useState(Math.floor(numberOfItems /
+    numberOfPlayersDefault));
+  useEffect(() => {
+    const columnHeaderClassNamesNew = columnHeaderClassNames.map((v, i) => getColumnHeaderClassName(checkBoxesValues, i));
+    setColumnHeaderClassNames(columnHeaderClassNamesNew);
+  }, [numberOfCardsPerPlayer]);
+
+  const [columnHeaderClassNames, setColumnHeaderClassNames] = useState(new Array(playerNumber.max).fill('head'));
+
+  const [columnHeaderValues, setColumnHeaderValues] = useState(Array.from({ length: playerNumber.max }, (_, k) => "P" + (k + 1)));
+
+  const [itemRowHeadersClassNames, setItemRowHeadersClassNames] = useState(new Array(numberOfItems).fill('normal'));
+
 
   function NumberOfPlayersInput() {
-    const name = 'numer-of-players';
-    const min = number.min;
-    const max = number.max;
-    const defaultValue = numberOfPlayers;
-    const options = Array.from({ length: (max - min + 1) }, (_, i) => <option key={i}>{i+min}</option>);
+    const min = playerNumber.min;
+    const max = playerNumber.max;
     return (
-      <React.StrictMode key={name}>
-        <form key={name} className={name}>
+        <form className='number-setting'>
           <label>
             {'플레이어 수: '}
-            <select name={name} className={name} defaultValue={defaultValue} min={min} max={max} onChange={(e) => onChangeNumberOfPlayers(e.target.value)}>
-              {options}
+            <select defaultValue={numberOfPlayers} min={min} max={max} onChange={(e) => setNumberOfPlayers(e.target.value)}>
+              {Array.from({ length: (max - min + 1) }, (_, i) => <option key={i}>{i + min}</option>)}
             </select>
             {' 명'}
           </label>
         </form>
-      </React.StrictMode>
     );
   }
 
   function NumberOfCardsPerPlayerInput() {
-    const name = 'number-of-cards-per-player';
-    const min = 1;
-    const max = numberOfItems;
-    const defaultValue = numberOfCardsPerPlayer;
-    const options = Array.from({ length: (max - min + 1) }, (v, i) => <option key={i}>{i + min}</option>);
     return (
-      <React.StrictMode key={name}>
-        <form key={name} className={name}>
-          <label>
-            {'1인당 카드 수: '}
-            <select name={name} className={name} defaultValue={defaultValue} min={min} max={max} onChange={(e) => setNumberOfCardsPerPlayer(e.target.value)}>
-              {options}
-            </select>
-            {' 장'}
-          </label>
-        </form>
-      </React.StrictMode>
+      <form className='number-setting'>
+        <label>
+          {'1인당 카드 수: '}
+          <select defaultValue={numberOfCardsPerPlayer} min={1} max={numberOfItems} onChange={(e) => setNumberOfCardsPerPlayer(e.target.value)}>
+            {Array.from({ length: playerNumber.max }, (_, i) => <option key={i}>{i + 1}</option>)}
+          </select>
+          {' 장'}
+        </label>
+      </form>
     );
-  }
-
-  function CheckBoxOptions() {
-    return Array.from(Icons.get(), (v, i) => <option key={i}>{v}</option>);
   }
 
   function CheckBoxes(props) {
@@ -132,10 +136,10 @@ function ClueSheet() {
         {
           Array.from({ length: numberOfPlayers }, ((_, column) => {
             return (
-              <td key={row + '-' + column} className='cell'>
+              <td key={column} className='cell'>
                 <form>
-                  <select className='cell' name='clue-sheet-cell' type='select' value={checkBoxesValues[row][column]} onChange={(e) => onChangeCell(row, column, e.target.value)}>
-                    <CheckBoxOptions />
+                  <select className='cell' value={checkBoxesValues[row][column]} onChange={(e) => setCheckBoxesValue(row, column, e.target.value)}>
+                    {Array.from(cellIConData, (v, i) => <option key={i}>{v}</option>)}
                   </select>
                 </form>
               </td>
@@ -144,12 +148,6 @@ function ClueSheet() {
         }
       </React.StrictMode>
     );
-  }
-
-  function onClickTableHeader(index) {
-    let columnHeaderValuesNew = columnHeaderValues.slice();
-    columnHeaderValuesNew[index] = prompt("새로운 이름을 입력하세요");
-    setColumnHeaderValues(columnHeaderValuesNew);
   }
 
   function TableHeader() {
@@ -161,7 +159,7 @@ function ClueSheet() {
             {
               Array.from({ length: numberOfPlayers }, (v, i) => {
                 return (
-                  <th key={i + 1} className={columnHeaderClassNames[i]} onClick={() => {onClickTableHeader(i)}}>{columnHeaderValues[i]}</th>
+                  <th key={i + 1} className={columnHeaderClassNames[i]} onClick={() => editColumnHeaderValue(i)}>{columnHeaderValues[i]}</th>
                 );
               })
             }
@@ -177,25 +175,28 @@ function ClueSheet() {
       <React.StrictMode key='table-body'>
         <tbody>
           {
-            Object.keys(sheetItemData).map((key, keyIndex) => {
-              const itemRows = Array.from(sheetItemData[key], (v, i) => {
-                const index = (offset + i);
-                return (
-                  <tr key={key + '-' + keyIndex + '-' + index}>
-                    <td key={key + '-' + keyIndex + '-' + index} className={itemRowHeadersClassNames[index]}>{v}</td>
-                    <CheckBoxes index={index} />
-                  </tr>
-                )
-              });
-
-              offset += sheetItemData[key].length;
-
-              return (
-                <React.StrictMode key={key + '-' + keyIndex}>
-                  <tr key={key + '-' + keyIndex}>
+            Object.keys(sheetItemData).map((key, index) => {
+              const headerRow = (
+                <tr key={index}>
                     <td key={key} className='head'>{key + Josa.c(key, '은/는') + '?'}</td>
                     <td key={key + '-empty'} className='empty' colSpan={numberOfPlayersDefault} />
                   </tr>
+              );
+
+              const itemRows = sheetItemData[key].map((v, i) => {
+                const row = (offset + i);
+                return (
+                  <tr key={row}>
+                    <td key={row} className={itemRowHeadersClassNames[row]} onDoubleClick={() => { setCheckBoxesValueRow(row, cellIConData[iconDataIndex.x]) }}>{v}</td>
+                    <CheckBoxes index={row} />
+                  </tr>
+                )
+              });
+              offset += sheetItemData[key].length;
+
+              return (
+                <React.StrictMode key={index}>
+                  {headerRow}
                   {itemRows}
                 </React.StrictMode>
               )
@@ -208,10 +209,8 @@ function ClueSheet() {
 
   return (
     <React.StrictMode>
-      <div>
-        <NumberOfPlayersInput />
-        <NumberOfCardsPerPlayerInput />
-      </div>
+      <NumberOfPlayersInput />
+      <NumberOfCardsPerPlayerInput />
       <table>
         <TableHeader />
         <TableBody />
