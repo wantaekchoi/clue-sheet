@@ -4,25 +4,29 @@ form.numer-of-players, form.numer-of-items, form.number-of-cards-per-player {
 }
 
 table {
-  border-spacing: 4px;
+  border-spacing: 2px;
   margin: 10px;
   background: blue;
 }
 
 th, tr, td {
   min-width: 30px;
-  font-size: medium;
+  font-size: small;
   text-decoration: none;
   padding-top: 2px;
   padding-bottom: 2px;
-  padding-left: 10px;
-  padding-right: 10px;
+  padding-left: 4px;
+  padding-right: 4px;
   color: blue;
   background: white;
 }
 
 th.head, td.head {
   font-weight: bold;
+}
+
+td.head {
+  min-width: 60px;
 }
 
 th.empty, td.empty {
@@ -44,7 +48,7 @@ td.cell {
 }
 
 select {
-  font-size: medium;
+  font-size: small;
 }
 
 select.numer-of-players, select.numer-of-items, select.number-of-cards-per-player {
