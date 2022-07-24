@@ -14,7 +14,7 @@ function ClueSheet() {
 
   const iconDataIndex = {
     default: 0,
-    checked: 1,
+    v: 1,
     x: 2,
   };
 
@@ -42,10 +42,12 @@ function ClueSheet() {
   }
 
   function getRowHeaderClassName(row) {
-    if (checkBoxesValues[row].every((v) => v === cellIConData[iconDataIndex.x]))
+    if (checkBoxesValues[row].every((v) => (v === cellIConData[iconDataIndex.x])))
       return 'expected'
+
     if (checkBoxesValues[row].includes(cellIConData[iconDataIndex.v]))
       return 'checked';
+
     return 'normal';
   }
 
