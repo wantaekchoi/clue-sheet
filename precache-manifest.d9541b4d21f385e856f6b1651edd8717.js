@@ -1,11 +1,11 @@
 self.__precacheManifest = [
   {
-    "revision": "dd6b59d1cc8e078fdb93",
-    "url": "/clue-sheet/static/css/main.9c9ca2b1.chunk.css"
+    "revision": "556d199607471750f049",
+    "url": "/clue-sheet/static/css/main.04bbaff7.chunk.css"
   },
   {
-    "revision": "dd6b59d1cc8e078fdb93",
-    "url": "/clue-sheet/static/js/main.a7efa312.chunk.js"
+    "revision": "556d199607471750f049",
+    "url": "/clue-sheet/static/js/main.a8c915d0.chunk.js"
   },
   {
     "revision": "dc5cf780a2b7ca5a9226",
@@ -20,7 +20,7 @@ self.__precacheManifest = [
     "url": "/clue-sheet/static/js/3.398cb210.chunk.js"
   },
   {
-    "revision": "0a7f9b87a04f76e2d77ca075af0d4598",
+    "revision": "7708cb600f10e22e944de3f9634d7a27",
     "url": "/clue-sheet/index.html"
   }
 ];
