@@ -1,17 +1,15 @@
-form.numer-of-players, form.numer-of-items, form.number-of-cards-per-player {
-  margin: 10px;
-  font-size: large;
+form.number-setting {
+  margin: 4px;
+  font-size: normal;
 }
 
 table {
-  border-spacing: 2px;
-  margin: 10px;
+  border-spacing: 4px;
   background: blue;
 }
 
 th, tr, td {
-  min-width: 30px;
-  font-size: small;
+  font-size: medium;
   text-decoration: none;
   padding-top: 2px;
   padding-bottom: 2px;
@@ -23,6 +21,7 @@ th, tr, td {
 
 th.head, td.head {
   font-weight: bold;
+  min-width: 30px;
 }
 
 td.head {
@@ -34,13 +33,16 @@ th.empty, td.empty {
 }
 
 th.normal, td.normal {
-  text-decoration: none;
   background: white;
 }
 
 th.checked, td.checked {
   text-decoration: line-through;
   background: gray;
+}
+
+th.expected, td.expected {
+  background: green;
 }
 
 td.cell {
